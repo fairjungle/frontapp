@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	defaultLogLevel = "info" // logrus: "debug" | "info" | "warning | "error" ...
+	defaultLogLevel = "info" // "debug" | "info" | "warning | "error"
 )
 
 var rootCmd = &cobra.Command{

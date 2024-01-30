@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -26,7 +25,7 @@ type Client struct {
 	apiToken string
 	apiURL   string
 	client   *http.Client
-	log      *logrus.Logger
+	log      *slog.Logger
 	timeout  time.Duration
 }
 
@@ -40,7 +39,7 @@ func NewClient(apiToken string, options ...Option) *Client {
 	result := &Client{
 		apiToken: apiToken,
 		apiURL:   defaultAPIURL,
-		log:      logrus.New(),
+		log:      slog.Default(),
 		timeout:  defaultTimeout,
 	}
 
@@ -75,7 +74,7 @@ func (c *Client) sendReq(method string, urlPath string, body interface{}, resp i
 		reader = bytes.NewReader(j)
 	}
 
-	c.log.Debugf("Sending request: %s", url)
+	c.log.Debug(fmt.Sprintf("Sending request: %s", url))
 
 	// create request
 	req, err := http.NewRequest(method, url, reader)
@@ -91,7 +90,7 @@ func (c *Client) sendReq(method string, urlPath string, body interface{}, resp i
 
 	// // DEBUG
 	// dump, _ := httputil.DumpRequestOut(req, true)
-	// c.log.Debugf("Sending request: %s", string(dump))
+	// c.log.Debug(fmt.Sprintf("Sending request: %s", string(dump))
 
 	// send request
 	response, err := c.client.Do(req)
@@ -102,7 +101,7 @@ func (c *Client) sendReq(method string, urlPath string, body interface{}, resp i
 
 	// // DEBUG
 	// raw, _ := ioutil.ReadAll(response.Body)
-	// c.log.Debugf("Received response: %s", string(raw))
+	// c.log.Debug(fmt.Sprintf("Received response: %s", string(raw))
 
 	switch response.StatusCode {
 	case http.StatusOK, http.StatusCreated, http.StatusAccepted:
@@ -138,7 +137,7 @@ func APIURL(val string) Option {
 }
 
 // Logger sets client logger
-func Logger(val *logrus.Logger) Option {
+func Logger(val *slog.Logger) Option {
 	return func(client *Client) {
 		client.log = val
 	}

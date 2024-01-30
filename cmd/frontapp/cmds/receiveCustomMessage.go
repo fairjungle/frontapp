@@ -3,10 +3,11 @@ package cmds
 import (
 	"errors"
 	"fmt"
+	"log/slog"
+	"os"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/fairjungle/frontapp"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -52,15 +53,24 @@ func init() {
 	rootCmd.AddCommand(receiveCustomMessageCmd)
 }
 
+func logLevel(arg string) slog.Level {
+	switch arg {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	}
+	return slog.LevelInfo
+}
+
 func receiveCustomMessageRun(cmd *cobra.Command, args []string) error {
 	// init logger
-	level, err := logrus.ParseLevel(viper.GetString("logLevel"))
-	if err != nil {
-		return fmt.Errorf("failed to parse log level: %w", err)
-	}
-
-	log := logrus.New()
-	log.Level = level
+	opts := &slog.HandlerOptions{Level: logLevel(viper.GetString("logLevel"))}
+	log := slog.New(slog.NewTextHandler(os.Stderr, opts))
 
 	// init client
 	apiToken := viper.GetString("apiToken")
